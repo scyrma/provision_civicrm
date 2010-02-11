@@ -1,22 +1,24 @@
 <?php
 
 /**
-
-Antoine suggère: 
- * avoir une plateforme
-
-
- */
-
-/**
  * implementation of provision_verify
  */
 function drush_provision_civicrm_provision_verify($url = null) {
-  if (PROVISION_CONTEXT_SITE && drush_get_option('site_civicrm')) {
+  if (PROVISION_CONTEXT_SITE) {
+    // todo: trigger if civicrm is already enabled and configured on the site
     // load civicrm.settings.php
+    // patch db connection information
     // patch paths
-    // patch db_url lines
-    // create paths in files/civicrm and change mod?
+    // patch urls
+    // empty files/civicrm/templates_c
+    // load data from civicrm_domain.backend_config
+    // update data with new paths and urls
+    // ...save
+    // empty civicrm_cache ?
+  }
+
+  if (PROVISION_CONTEXT_SITE && drush_get_option('site_civicrm')) {
+    // todo: (phase II) setup civicrm on demand
     drush_log(dt("configuring site for civicrm support"));
   }
 }
