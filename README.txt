@@ -4,6 +4,8 @@ CiviCRM support for Aegir
 This Drush module will update the CiviCRM configuration file and database
 when migrating sites.
 
+Also see http://wiki.civicrm.org/confluence/display/CRMDOC/Moving+an+Existing+Installation+to+a+New+Server+or+Location
+
 Installation instructions
 -------------------------
 
