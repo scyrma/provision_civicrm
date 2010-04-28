@@ -231,7 +231,7 @@ function drush_civicrm_install($dbuser,$dbpass,$dbhost,$dbname,$tarfile) {
                       'server' => $dbhost, 'database' => $dbname,
                      );
     $config = array('site_dir' => drush_get_option('site_url'),
-                    'base_url' => drush_get_option('site_url'),
+                    'base_url' => 'http://'. drush_get_option('site_url'),
                     'mysql'    => $dbConfig,
                     'drupal'   => $dbConfig,
                    );
