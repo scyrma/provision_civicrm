@@ -3,7 +3,7 @@
 /**
  * implementation of provision_verify
  */
-function drush_provision_civicrm_provision_verify($url = null) {
+function drush_civicrm_provision_verify($url = null) {
   if (PROVISION_CONTEXT_SITE) {
     // todo: trigger if civicrm is already enabled and configured on the site
     // load civicrm.settings.php
@@ -26,8 +26,8 @@ function drush_provision_civicrm_provision_verify($url = null) {
 /**
  * Persist civicrm settings in the drushrc.php
  */
-function drush_provision_civicrm_post_provision_verify($url = NULL) {
+function drush_civicrm_post_provision_verify($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    //drush_set_option('site_civicrm', drush_get_option('site_civicrm'), 'site');
+    drush_set_option('site_civicrm', drush_get_option('site_civicrm'), 'site');
   }
 }

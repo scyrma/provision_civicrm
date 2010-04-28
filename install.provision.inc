@@ -3,7 +3,7 @@
 /**
  * implementation of hook_pre_provision_install
  */
-function drush_provision_civicrm_pre_provision_install($url = NULL) {
+function drush_civicrm_pre_provision_install($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
     // if necessary ...
   }
@@ -12,7 +12,7 @@ function drush_provision_civicrm_pre_provision_install($url = NULL) {
 /**
  * implementation of hook_provision_install
  */
-function drush_provision_civicrm_provision_install($url = null) {
+function drush_civicrm_provision_install($url = null) {
   if (PROVISION_CONTEXT_SITE) {
 
     $packages = drush_get_option('packages', 'platform');
@@ -21,18 +21,24 @@ function drush_provision_civicrm_provision_install($url = null) {
     }
     drush_log(dt("configuring site for civicrm support"));
 
-    echo "would call: civicrm_install(array(db_name => ". drush_get_option('db_name', 'site') .", db_user => ". drush_get_option('db_user', 'site') .", db_pass => ". drush_get_option('db_passwd', 'site') ."));";
-    //civicrm_install(array(db_name => drush_get_option('db_name', 'site'), db_user => drush_get_option('db_user', 'site'), db_pass => drush_get_option('db_passwd', 'site')));
+    //echo "would call: civicrm_install(array(db_name => ". drush_get_option('db_name', 'site') .", db_user => ". drush_get_option('db_user', 'site') .", db_pass => ". drush_get_option('db_passwd', 'site') ."));";
+    drush_civicrm_install(
+          drush_get_option('db_user', 'site'),
+          drush_get_option('db_passwd', 'site'),
+          drush_get_option('db_host', 'site'),
+          drush_get_option('db_name', 'site'),
+          null
+        );
 
-    drush_set_option('site_civicrm', drush_get_option('site_civicrm'), 'site');
+    drush_set_option('site_civicrm', TRUE, 'site');
   }
 }
 
 /**
  * implementation of hook_provision_install
  */
-function drush_provision_civicrm_post_provision_install($url = NULL) {
+function drush_civicrm_post_provision_install($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    // if necessary ...
+    drush_pm_enable('civicrm');
   }
 }

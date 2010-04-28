@@ -67,7 +67,7 @@ function civicrm_drush_command() {
 
     // the key in the $items array is the name of the command.
     $items['civicrm-install'] = 
-        array('callback'    => 'civicrm_install',
+        array('callback'    => 'drush_civicrm_install',
               'description' => "Install a new instance of CiviCRM.",
               'options'     =>
                 array('--dbuser'    => 'MySQL username for your Drupal/CiviCRM database.',
@@ -168,40 +168,61 @@ function civicrm_drush_command() {
     return $items;
 }
 
-function civicrm_install() {
-    $dbuser = drush_get_option('dbuser', false);
+function drush_civicrm_install($dbuser,$dbpass,$dbhost,$dbname,$tarfile) {
+    global $crmPath, $sqlPath, $cmsPath;
+    
+    if (!isset( $dbuser )) {
+        $dbuser = drush_get_option('dbuser', false);
+    }
     if ( !$dbuser ) {
         drush_die(dt('CiviCRM database username not specified.'));
     }
-    $dbpass = drush_get_option('dbpass', false);
+    if (!isset( $dbpass )) {
+        $dbpass = drush_get_option('dbpass', false);
+    }
     if ( !$dbpass ) {
         drush_die(dt('CiviCRM database password not specified.'));
     }
-    $dbhost = drush_get_option('dbhost', 'localhost');
+    if (!isset( $dbhost )) {
+        $dbhost = drush_get_option('dbhost', false);
+    }
     if ( !$dbhost ) {
         drush_die(dt('CiviCRM database host not specified.'));
     }
-    $dbname = drush_get_option('dbname', false);
+    if (!isset( $dbname )) {
+        $dbname = drush_get_option('dbname', false);
+    }
     if ( !$dbname ) {
         drush_die(dt('CiviCRM database name not specified.'));
     }
-    $tarfile = drush_get_option('tarfile', false);
-    if ( !$tarfile ) {
+    if (!isset( $tarfile )) {
+        $tarfile = drush_get_option('tarfile');
+    }
+    // installer global'izes this variable
+    $crmPath = drush_get_context('DRUSH_DRUPAL_ROOT')."/sites/all/modules";
+    if ( !is_dir( $crmPath.'/civicrm' ) && !$tarfile ) {
         drush_die(dt('CiviCRM tarfile not specified.'));
     }
     //FIXME: throw error if tarfile is not in a valid format.
     
-    // installer global'izes this variable
-    $crmPath = "./.civicrm_src";
+    $step = '1';
     
-    // Decompress / untar CiviCRM
-    drush_shell_exec("gzip -d " . $tarfile);
-    $tarpath = substr($tarfile, 0, strlen($tarfile)-3);
-    drush_shell_exec("tar -xf $tarpath -C \"$crmPath\"");
-    drush_log(dt('1. Tarfile unpacked.'), 'ok');
+    // Decompress / untar CiviCRM if necessary
+    drush_log(dt($step++ . ". Checking for existing CiviCRM."), 'ok');
+    if ( !is_dir($crmPath.'/civicrm') ) {
+        drush_log(dt($step++ . ". Unpacking tarfile"), 'ok');
+        drush_shell_exec("gzip -d " . $tarfile);
+        $tarpath = substr($tarfile, 0, strlen($tarfile)-3);
+        drush_shell_exec("tar -xf $tarpath -C \"$crmPath\"");
+        drush_log(dt($step++ . ". Tarfile unpacked."), 'ok');
+    } else {
+        drush_log(dt($step++ . ". Existing CiviCRM found."), 'ok');
+    }
+    $crmPath .= '/civicrm';
     
     // Configure the CiviCRM installer
-    require_once "$srcdir/install/civicrm.php";
+    drush_log(dt($step++ . ". Setting up CiviCRM configuration."), 'ok');
+    require_once "$crmPath/install/civicrm.php";
     define(DIRECTORY_SEPARATOR, '/');
     // installer global'izes these variables
     $sqlPath = "$crmPath/sql";
@@ -209,13 +230,16 @@ function civicrm_install() {
     $dbConfig = array('username' => $dbuser, 'password' => $dbpass,
                       'server' => $dbhost, 'database' => $dbname,
                      );
-    $config = array('site_dir' => drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE),
+    $config = array('site_dir' => drush_get_option('site_url'),
+                    'base_url' => $_GLOBALS['base_url'],
                     'mysql'    => $dbConfig,
                     'drupal'   => $dbConfig,
                    );
     
     // Run the installer
+    drush_log(dt($step++ . ". Installing CiviCRM."), 'ok');
     civicrm_main( $config );
+    drush_log(dt($step++ . ". CiviCRM installed. Enable the module in Drupal."), 'ok');
 }
 
 /**
